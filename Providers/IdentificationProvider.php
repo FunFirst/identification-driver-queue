@@ -16,7 +16,6 @@ declare(strict_types=1);
 
 namespace Tenancy\Identification\Drivers\Queue\Providers;
 
-use Illuminate\Queue\QueueManager;
 use Tenancy\Identification\Drivers\Queue\Contracts\IdentifiesByQueue;
 use Tenancy\Identification\Drivers\Queue\Middleware;
 use Tenancy\Support\DriverProvider;
@@ -29,12 +28,10 @@ class IdentificationProvider extends DriverProvider
 
     public function boot()
     {
-        $this->app->resolving(QueueManager::class, function ($queue) {
-            // Store tenant key and identifier on job payload when a tenant is identified.
-            $queue->createPayloadUsing($this->app->make(Middleware\SaveTenantOnQueuePayload::class));
+        // Store tenant key and identifier on job payload when a tenant is identified.
+        \Queue::createPayloadUsing($this->app->make(Middleware\SaveTenantOnQueuePayload::class));
 
-            // Resolve any tenant related meta data on job and allow resolving of tenant.
-            $queue->before($this->app->make(Middleware\ReadTenantFromQueuePayload::class));
-        });
+        // Resolve any tenant related meta data on job and allow resolving of tenant.
+        \Queue::before($this->app->make(Middleware\ReadTenantFromQueuePayload::class));
     }
 }
